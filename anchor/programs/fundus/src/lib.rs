@@ -19,4 +19,14 @@ pub mod fundus {
     pub fn initialize(ctx: Context<InitalizeCtx>) -> Result<()> {
         instructions::initialize(ctx)
     }
+
+    pub fn create_campaign(
+        ctx: Context<CreateCampaignCtx>,
+        title: String,
+        description: String,
+        image_url: String,
+        goal: u64,
+    ) -> Result<()> {
+        instructions::create_campaign(ctx, title, description, image_url, goal)
+    }
 }
