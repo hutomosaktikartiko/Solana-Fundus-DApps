@@ -40,4 +40,8 @@ pub mod fundus {
     ) -> Result<()> {
         instructions::update_campaign(ctx, cid, title, description, image_url, goal)
     }
+
+    pub fn delete_campaign(ctx: Context<DeleteCampaignCtx>, cid: u64) -> Result<()> {
+        instructions::delete_campaign(ctx, cid)
+    }
 }

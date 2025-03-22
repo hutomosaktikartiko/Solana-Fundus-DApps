@@ -16,4 +16,6 @@ pub enum ErrorCode {
     Unauthorized,
     #[msg("Campaign not found")]
     CampaignNotFound,
+    #[msg("Campaign is inactive")]
+    InactiveCampaign,
 }
