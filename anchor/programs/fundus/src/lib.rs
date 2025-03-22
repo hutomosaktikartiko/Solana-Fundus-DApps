@@ -29,4 +29,15 @@ pub mod fundus {
     ) -> Result<()> {
         instructions::create_campaign(ctx, title, description, image_url, goal)
     }
+
+    pub fn update_campaign(
+        ctx: Context<UpdateCampaignCtx>,
+        cid: u64,
+        title: String,
+        description: String,
+        image_url: String,
+        goal: u64,
+    ) -> Result<()> {
+        instructions::update_campaign(ctx, cid, title, description, image_url, goal)
+    }
 }
