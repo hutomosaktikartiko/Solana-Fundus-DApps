@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-fundus = "AWMHjJYpfc8iDrHRALDryZtw8X2FQubnwH5ztGnxSatu"
+fundus = "5Z1U7HwvHvLyaSqcKAa9VrydcVoDGhT6NC8SWMqERB6A"
 
 [registry]
 url = "https://api.apr.dev"
