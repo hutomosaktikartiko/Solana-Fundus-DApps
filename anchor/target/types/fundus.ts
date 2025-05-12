@@ -376,7 +376,7 @@ export type Fundus = {
               {
                 "kind": "const",
                 "value": [
-                  67,
+                  99,
                   97,
                   109,
                   112,
@@ -406,7 +406,7 @@ export type Fundus = {
           "writable": true
         },
         {
-          "name": "withdrawer",
+          "name": "creator",
           "writable": true,
           "signer": true
         },

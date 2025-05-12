@@ -8,7 +8,7 @@ describe("fundus", () => {
   anchor.setProvider(provider);
   const program = new anchor.Program<Fundus>(idl as any, provider);
 
-  let CID: any, DONORS_COUNT: any;
+  let CID: any, DONORS_COUNT: any, WITHDRAWALS_COUNT: any;
 
   it("create a campaign", async () => {
     const creator = provider.wallet;
@@ -46,6 +46,7 @@ describe("fundus", () => {
     const campaign = await program.account.campaign.fetch(campaignPda);
     console.log("Campaign: ", campaign);
     DONORS_COUNT = campaign.donors;
+    WITHDRAWALS_COUNT = campaign.withdrawals;
   });
 
   it("update a campaign", async () => {
@@ -122,6 +123,81 @@ describe("fundus", () => {
     console.log(`
       Campaign before: ${campaignBefore}
       Campaign after: ${campaignAfter}
+    `);
+  });
+
+  it("withdraw from a campaign", async () => {
+    const creator = provider.wallet;
+
+    const [programStatePda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("program_state")],
+      program.programId
+    );
+
+    const [campaignPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("campaign"), CID.toArrayLike(Buffer, "le", 8)],
+      program.programId
+    );
+
+    const [transactionPda] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("withdraw"),
+        creator.publicKey.toBuffer(),
+        CID.toArrayLike(Buffer, "le", 8),
+        WITHDRAWALS_COUNT.add(new anchor.BN(1)).toArrayLike(Buffer, "le", 8),
+      ],
+      program.programId
+    );
+
+    const creatorBefore = await provider.connection.getBalance(
+      creator.publicKey
+    );
+    const campaignBefore = await provider.connection.getBalance(campaignPda);
+
+    const programState = await program.account.programState.fetch(
+      programStatePda
+    );
+    const platformBefore = await provider.connection.getBalance(
+      programState.platformAddress
+    );
+
+    const withdraw_amount = new anchor.BN(3.5 * 1_000_000_000);
+    const tx = await program.methods
+      .withdraw(CID, withdraw_amount)
+      .accountsPartial({
+        programState: programStatePda,
+        campaign: campaignPda,
+        transaction: transactionPda,
+        platformAddress: programState.platformAddress,
+        creator: creator.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log("Withdrawal successful: ", tx);
+
+    const creatorAfter = await provider.connection.getBalance(
+      creator.publicKey
+    );
+    const campaignAfter = await provider.connection.getBalance(campaignPda);
+    const transaction = await program.account.transaction.fetch(transactionPda);
+
+    const platformAfter = await provider.connection.getBalance(
+      programState.platformAddress
+    );
+
+    console.log("Withdrawal: ", transaction);
+    console.log(`
+      Creator before: ${creatorBefore}
+      Creator after: ${creatorAfter}
+    `);
+    console.log(`
+      Campaign before: ${campaignBefore}
+      Campaign after: ${campaignAfter}
+    `);
+    console.log(`
+      Platform before: ${platformBefore}
+      Platform after: ${platformAfter}
     `);
   });
 

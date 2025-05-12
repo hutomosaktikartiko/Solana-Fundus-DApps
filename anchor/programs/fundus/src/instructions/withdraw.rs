@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 
 pub fn withdraw(ctx: Context<WithdrawCtx>, cid: u64, amount: u64) -> Result<()> {
     let campaign = &mut ctx.accounts.campaign;
-    let creator = &ctx.accounts.withdrawer;
+    let creator = &ctx.accounts.creator;
     let transaction = &mut ctx.accounts.transaction;
     let state = &mut ctx.accounts.program_state;
     let platform_account_info = &ctx.accounts.platform_address;
@@ -68,7 +68,7 @@ pub struct WithdrawCtx<'info> {
     #[account(
         mut,
         seeds = [
-            b"Campaign",
+            b"campaign",
             cid.to_le_bytes().as_ref()
         ],
         bump
@@ -77,11 +77,11 @@ pub struct WithdrawCtx<'info> {
 
     #[account(
         init,
-        payer = withdrawer,
+        payer = creator,
         space = ANCHOR_DISCRIMINATOR_SIZE + Transaction::INIT_SPACE,
         seeds = [
             b"withdraw",
-            withdrawer.key().as_ref(),
+            creator.key().as_ref(),
             cid.to_le_bytes().as_ref(),
             (campaign.withdrawals + 1).to_le_bytes().as_ref()
         ],
@@ -97,6 +97,6 @@ pub struct WithdrawCtx<'info> {
     pub platform_address: AccountInfo<'info>,
 
     #[account(mut)]
-    pub withdrawer: Signer<'info>,
+    pub creator: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
