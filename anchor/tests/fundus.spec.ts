@@ -8,7 +8,7 @@ describe("fundus", () => {
   anchor.setProvider(provider);
   const program = new anchor.Program<Fundus>(idl as any, provider);
 
-  let CID: any;
+  let CID: any, DONORS_COUNT: any;
 
   it("create a campaign", async () => {
     const creator = provider.wallet;
@@ -45,6 +45,7 @@ describe("fundus", () => {
 
     const campaign = await program.account.campaign.fetch(campaignPda);
     console.log("Campaign: ", campaign);
+    DONORS_COUNT = campaign.donors;
   });
 
   it("update a campaign", async () => {
@@ -73,6 +74,55 @@ describe("fundus", () => {
 
     const campaign = await program.account.campaign.fetch(campaignPda);
     console.log("Campaign: ", campaign);
+  });
+
+  it("donate to a campaign", async () => {
+    const donor = provider.wallet;
+
+    const [campaignPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("campaign"), CID.toArrayLike(Buffer, "le", 8)],
+      program.programId
+    );
+
+    const [transactionPda] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("donor"),
+        donor.publicKey.toBuffer(),
+        CID.toArrayLike(Buffer, "le", 8),
+        DONORS_COUNT.add(new anchor.BN(1)).toArrayLike(Buffer, "le", 8),
+      ],
+      program.programId
+    );
+
+    const donorBefore = await provider.connection.getBalance(donor.publicKey);
+    const campaignBefore = await provider.connection.getBalance(campaignPda);
+
+    const donation_amount = new anchor.BN(10.5 * 1_000_000_000);
+    const tx = await program.methods
+      .donate(CID, donation_amount)
+      .accountsPartial({
+        campaign: campaignPda,
+        transaction: transactionPda,
+        donor: donor.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log("Donation successful: ", tx);
+
+    const donorAfter = await provider.connection.getBalance(donor.publicKey);
+    const campaignAfter = await provider.connection.getBalance(campaignPda);
+    const transaction = await program.account.transaction.fetch(transactionPda);
+
+    console.log("Donation: ", transaction);
+    console.log(`
+      Donor before: ${donorBefore}
+      Donor after: ${donorAfter}
+    `);
+    console.log(`
+      Campaign before: ${campaignBefore}
+      Campaign after: ${campaignAfter}
+    `);
   });
 
   it("delete a campaign", async () => {

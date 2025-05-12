@@ -59,7 +59,7 @@ pub struct DonateCtx<'info> {
     #[account(
         mut,
         seeds = [
-            b"Campaign",
+            b"campaign",
             cid.to_le_bytes().as_ref()
         ],
         bump
