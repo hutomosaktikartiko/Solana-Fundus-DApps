@@ -1,16 +1,43 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Fundus } from "anchor/target/types/fundus";
 import idl from "../target/idl/fundus.json";
+import fs from "fs";
 const { SystemProgram, PublicKey } = anchor.web3;
 
-describe("fundus", () => {
-  const provider = anchor.AnchorProvider.local();
+const toggleProvider = (user: "deployer" | "creator") => {
+  let wallet: any;
+  if (user === "creator") {
+    const keypairData = JSON.parse(fs.readFileSync("user.json", "utf-8"));
+    wallet = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(keypairData));
+  } else {
+    const keypairPath = `${process.env.HOME}/.config/solana/id.json`;
+    const keypairData = JSON.parse(fs.readFileSync(keypairPath, "utf-8"));
+    wallet = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(keypairData));
+  }
+
+  const defaultProvider = anchor.AnchorProvider.local();
+
+  const provider = new anchor.AnchorProvider(
+    defaultProvider.connection,
+    new anchor.Wallet(wallet),
+    defaultProvider.opts
+  );
+
   anchor.setProvider(provider);
-  const program = new anchor.Program<Fundus>(idl as any, provider);
+
+  return provider;
+};
+
+describe("fundus", () => {
+  let provider = toggleProvider("creator");
+  let program = new anchor.Program<Fundus>(idl as any, provider);
 
   let CID: any, DONORS_COUNT: any, WITHDRAWALS_COUNT: any;
 
   it("create a campaign", async () => {
+    provider = toggleProvider("creator");
+    program = new anchor.Program<Fundus>(idl as any, provider);
+
     const creator = provider.wallet;
 
     const [programStatePda] = PublicKey.findProgramAddressSync(
@@ -50,6 +77,9 @@ describe("fundus", () => {
   });
 
   it("update a campaign", async () => {
+    provider = toggleProvider("creator");
+    program = new anchor.Program<Fundus>(idl as any, provider);
+
     const creator = provider.wallet;
 
     const [campaignPda] = PublicKey.findProgramAddressSync(
@@ -78,6 +108,9 @@ describe("fundus", () => {
   });
 
   it("donate to a campaign", async () => {
+    provider = toggleProvider("deployer");
+    program = new anchor.Program<Fundus>(idl as any, provider);
+
     const donor = provider.wallet;
 
     const [campaignPda] = PublicKey.findProgramAddressSync(
@@ -127,6 +160,9 @@ describe("fundus", () => {
   });
 
   it("withdraw from a campaign", async () => {
+    provider = toggleProvider("creator");
+    program = new anchor.Program<Fundus>(idl as any, provider);
+
     const creator = provider.wallet;
 
     const [programStatePda] = PublicKey.findProgramAddressSync(
@@ -202,6 +238,9 @@ describe("fundus", () => {
   });
 
   it("delete a campaign", async () => {
+    provider = toggleProvider("creator");
+    program = new anchor.Program<Fundus>(idl as any, provider);
+
     const creator = provider.wallet;
 
     const [campaignPda] = PublicKey.findProgramAddressSync(
@@ -225,6 +264,9 @@ describe("fundus", () => {
   });
 
   it("updates platform fee", async () => {
+    provider = toggleProvider("deployer");
+    program = new anchor.Program<Fundus>(idl as any, provider);
+
     const updater = provider.wallet;
 
     const [programStatePda] = PublicKey.findProgramAddressSync(
