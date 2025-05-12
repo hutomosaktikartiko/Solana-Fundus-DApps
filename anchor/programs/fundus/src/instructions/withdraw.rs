@@ -1,8 +1,7 @@
 use crate::constants::ANCHOR_DISCRIMINATOR_SIZE;
 use crate::errors::ErrorCode::*;
 use crate::states::{Campaign, ProgramState, Transaction};
-use anchor_lang::solana_program::address_lookup_table::instruction;
-use anchor_lang::{accounts, prelude::*};
+use anchor_lang::prelude::*;
 
 pub fn withdraw(ctx: Context<WithdrawCtx>, cid: u64, amount: u64) -> Result<()> {
     let campaign = &mut ctx.accounts.campaign;
