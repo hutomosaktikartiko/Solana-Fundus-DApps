@@ -18,4 +18,8 @@ pub enum ErrorCode {
     CampaignNotFound,
     #[msg("Campaign is inactive")]
     InactiveCampaign,
+    #[msg("Doantion amount must be at least 1 SOL")]
+    InvalidDonationAmount,
+    #[msg("Campaign goal reached")]
+    CampaignGoalActualized,
 }
