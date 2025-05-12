@@ -21,7 +21,8 @@
       ],
       "accounts": [
         {
-          "name": "program_state"
+          "name": "program_state",
+          "writable": true
         },
         {
           "name": "campaign",

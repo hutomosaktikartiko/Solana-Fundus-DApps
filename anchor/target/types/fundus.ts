@@ -27,7 +27,8 @@ export type Fundus = {
       ],
       "accounts": [
         {
-          "name": "programState"
+          "name": "programState",
+          "writable": true
         },
         {
           "name": "campaign",

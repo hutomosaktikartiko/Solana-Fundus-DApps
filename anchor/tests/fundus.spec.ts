@@ -46,4 +46,32 @@ describe("fundus", () => {
     const campaign = await program.account.campaign.fetch(campaignPda);
     console.log("Campaign: ", campaign);
   });
+
+  it("update a campaign", async () => {
+    const creator = provider.wallet;
+
+    const [campaignPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("campaign"), CID.toArrayLike(Buffer, "le", 8)],
+      program.programId
+    );
+
+    const title = `Updated Campaign Title #${CID.toString()}`;
+    const description = `Updated campaign description #${CID.toString()}`;
+    const image_url = `https://dummy_image_${CID.toString()}.png`;
+    const goal = new anchor.BN(30 * 1_000_000_000); // 25 SOL
+
+    const tx = await program.methods
+      .updateCampaign(CID, title, description, image_url, goal)
+      .accountsPartial({
+        campaign: campaignPda,
+        creator: creator.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log("Campaign updated: ", tx);
+
+    const campaign = await program.account.campaign.fetch(campaignPda);
+    console.log("Campaign: ", campaign);
+  });
 });

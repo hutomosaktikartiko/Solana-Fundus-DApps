@@ -48,6 +48,7 @@ pub fn create_campaign(
 
 #[derive(Accounts)]
 pub struct CreateCampaignCtx<'info> {
+    #[account(mut)]
     pub program_state: Account<'info, ProgramState>,
 
     #[account(
