@@ -97,4 +97,33 @@ describe("fundus", () => {
     const campaign = await program.account.campaign.fetch(campaignPda);
     console.log("Campaign: ", campaign);
   });
+
+  it("updates platform fee", async () => {
+    const updater = provider.wallet;
+
+    const [programStatePda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("program_state")],
+      program.programId
+    );
+
+    const stateBefore = await program.account.programState.fetch(
+      programStatePda
+    );
+    console.log("State before: ", stateBefore);
+
+    const tx = await program.methods
+      .updatePlatformSettings(new anchor.BN(5))
+      .accountsPartial({
+        updater: updater.publicKey,
+        programState: programStatePda,
+      })
+      .rpc();
+
+    console.log("Platform fee updated: ", tx);
+
+    const stateAfter = await program.account.programState.fetch(
+      programStatePda
+    );
+    console.log("State after: ", stateAfter);
+  });
 });
