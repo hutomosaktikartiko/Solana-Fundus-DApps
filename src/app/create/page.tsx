@@ -1,21 +1,40 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useWallet } from "@solana/wallet-adapter-react";
+import { resolve } from "path";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 export default function Page() {
+  const { publicKey, sendTransaction, signTransaction } = useWallet();
+
   // Local form state
   const [form, setForm] = useState({
-    title: '',
-    description: '',
-    image_url: '',
-    goal: '',
-  })
+    title: "",
+    description: "",
+    image_url: "",
+    goal: "",
+  });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    console.log('Form Submitted:', form)
-    alert('Campaign created successfully!')
-  }
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await toast.promise(
+      new Promise<void>(async (resolve, reject) => {
+        try {
+          setTimeout(() => {
+            resolve();
+          }, 3000);
+        } catch (error) {
+          reject(error);
+        }
+      }),
+      {
+        pending: "Approve transaction...",
+        success: "Transaction successful👌",
+        error: "Encountered an error❌",
+      }
+    );
+  };
 
   return (
     <div className="container mx-auto p-6">
@@ -44,9 +63,9 @@ export default function Page() {
           placeholder="How many SOLs for your dream?"
           value={form.goal}
           onChange={(e) => {
-            const value = e.target.value
+            const value = e.target.value;
             if (/^\d*\.?\d{0,2}$/.test(value)) {
-              setForm({ ...form, goal: value })
+              setForm({ ...form, goal: value });
             }
           }}
           className="w-full p-2 border rounded text-black"
@@ -71,5 +90,5 @@ export default function Page() {
         </div>
       </form>
     </div>
-  )
+  );
 }
