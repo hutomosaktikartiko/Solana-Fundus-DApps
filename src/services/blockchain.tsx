@@ -7,6 +7,9 @@ import {
 } from "@solana/web3.js";
 import { Fundus } from "../../anchor/target/types/fundus";
 import idl from "../../anchor/target/idl/fundus.json";
+import { Campaign } from "@/utils/interfaces";
+import { publicKey } from "@coral-xyz/anchor/dist/cjs/utils";
+import { timeStamp } from "console";
 
 const getClusterUrl = (cluster: string): string => {
   const clusterUrl: any = {
@@ -107,4 +110,31 @@ export const createCampaign = async (
   await connection.confirmTransaction(tx, "finalized");
 
   return tx;
+};
+
+export const fetchActiveCampaigns = async (
+  program: Program<Fundus>
+): Promise<Campaign[]> => {
+  const campaigns = program.account.campaign.all();
+  const activeCampaigns = (await campaigns).filter((c) => c.account.active);
+
+  return serializeCampaigns(activeCampaigns);
+};
+
+const serializeCampaigns = (campaigns: any[]): Campaign[] => {
+  const modified: Campaign[] = campaigns.map((c: any) => ({
+    ...c.account,
+    publicKey: c.publicKey.toBase58(),
+    cid: c.account.cid.toNumber(),
+    creator: c.account.creator.toBase58(),
+    goal: c.account.goal.toNumber(),
+    amountRaised: c.account.amountRaised.toNumber(),
+    timeStamp: c.account.timestamp.toNumber(),
+    donors: c.account.donors.toNumber(),
+    withdrawals: c.account.withdrawals.toNumber(),
+    balance: c.account.balance.toNumber(),
+    active: c.account.active,
+  }));
+
+  return modified;
 };
