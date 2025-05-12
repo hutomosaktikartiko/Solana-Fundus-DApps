@@ -1,12 +1,17 @@
 "use client";
 
+import { createCampaign, getProvider } from "@/services/blockchain";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { resolve } from "path";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function Page() {
   const { publicKey, sendTransaction, signTransaction } = useWallet();
+
+  const program = useMemo(
+    () => getProvider(publicKey, signTransaction, sendTransaction),
+    [publicKey, signTransaction, sendTransaction]
+  );
 
   // Local form state
   const [form, setForm] = useState({
@@ -18,12 +23,32 @@ export default function Page() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!publicKey) {
+      return toast.warn("Please connect your wallet first");
+    }
+
     await toast.promise(
       new Promise<void>(async (resolve, reject) => {
         try {
-          setTimeout(() => {
-            resolve();
-          }, 3000);
+          const { title, description, image_url, goal } = form;
+          const tx: any = await createCampaign(
+            program!,
+            publicKey!,
+            title,
+            description,
+            image_url,
+            Number(goal)
+          );
+
+          setForm({
+            title: "",
+            description: "",
+            image_url: "",
+            goal: "",
+          });
+
+          console.log(tx);
+          resolve(tx);
         } catch (error) {
           reject(error);
         }
