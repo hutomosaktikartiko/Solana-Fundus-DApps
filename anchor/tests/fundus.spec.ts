@@ -74,4 +74,27 @@ describe("fundus", () => {
     const campaign = await program.account.campaign.fetch(campaignPda);
     console.log("Campaign: ", campaign);
   });
+
+  it("delete a campaign", async () => {
+    const creator = provider.wallet;
+
+    const [campaignPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("campaign"), CID.toArrayLike(Buffer, "le", 8)],
+      program.programId
+    );
+
+    const tx = await program.methods
+      .deleteCampaign(CID)
+      .accountsPartial({
+        campaign: campaignPda,
+        creator: creator.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log("Campaign deleted: ", tx);
+
+    const campaign = await program.account.campaign.fetch(campaignPda);
+    console.log("Campaign: ", campaign);
+  });
 });
