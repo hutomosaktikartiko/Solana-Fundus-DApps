@@ -63,6 +63,124 @@ export type Fundus = {
       ]
     },
     {
+      "name": "deleteCampaign",
+      "discriminator": [
+        223,
+        105,
+        48,
+        131,
+        88,
+        27,
+        249,
+        227
+      ],
+      "accounts": [
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "cid"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "cid",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "donate",
+      "discriminator": [
+        121,
+        186,
+        218,
+        211,
+        73,
+        70,
+        196,
+        180
+      ],
+      "accounts": [
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "cid"
+              }
+            ]
+          }
+        },
+        {
+          "name": "transaction",
+          "writable": true
+        },
+        {
+          "name": "donor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "cid",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "initialize",
       "discriminator": [
         175,
@@ -112,6 +230,200 @@ export type Fundus = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "updateCampaign",
+      "discriminator": [
+        235,
+        31,
+        39,
+        49,
+        121,
+        173,
+        19,
+        92
+      ],
+      "accounts": [
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "cid"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "cid",
+          "type": "u64"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "imageUrl",
+          "type": "string"
+        },
+        {
+          "name": "goal",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "updatePlatformSettings",
+      "discriminator": [
+        213,
+        238,
+        2,
+        39,
+        128,
+        157,
+        3,
+        95
+      ],
+      "accounts": [
+        {
+          "name": "updater",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "programState",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  103,
+                  114,
+                  97,
+                  109,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "newPlatformFee",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "discriminator": [
+        183,
+        18,
+        70,
+        156,
+        148,
+        109,
+        161,
+        34
+      ],
+      "accounts": [
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "cid"
+              }
+            ]
+          }
+        },
+        {
+          "name": "transaction",
+          "writable": true
+        },
+        {
+          "name": "programState",
+          "writable": true
+        },
+        {
+          "name": "platformAddress",
+          "writable": true
+        },
+        {
+          "name": "withdrawer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "cid",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -140,33 +452,91 @@ export type Fundus = {
         167,
         230
       ]
+    },
+    {
+      "name": "transaction",
+      "discriminator": [
+        11,
+        24,
+        174,
+        129,
+        203,
+        117,
+        242,
+        23
+      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
       "name": "alreadyInitialized",
-      "msg": "The program has already been initialized"
+      "msg": "The program has already been initialized."
     },
     {
       "code": 6001,
       "name": "titleTooLong",
-      "msg": "Title exceeds maximum length of 64 characters"
+      "msg": "Title exceeds maximum length of 64 characters."
     },
     {
       "code": 6002,
       "name": "descriptionTooLong",
-      "msg": "Description exceeds maximum length of 512 characters"
+      "msg": "Description exceeds maximum length of 512 characters."
     },
     {
       "code": 6003,
       "name": "imageUrlTooLong",
-      "msg": "Image URL exceeds maximum length of 256 characters"
+      "msg": "Image URL exceeds maximum length of 256 characters."
     },
     {
       "code": 6004,
       "name": "invalidGoalAmount",
-      "msg": "Invalid goal amount, Goal must be greater than zero"
+      "msg": "Invalid goal amount, Goal must be greater than zero."
+    },
+    {
+      "code": 6005,
+      "name": "unauthorized",
+      "msg": "Unauthorized access."
+    },
+    {
+      "code": 6006,
+      "name": "campaignNotFound",
+      "msg": "Campaign not found."
+    },
+    {
+      "code": 6007,
+      "name": "inactiveCampaign",
+      "msg": "Campaign is inactive."
+    },
+    {
+      "code": 6008,
+      "name": "invalidDonationAmount",
+      "msg": "Doantion amount must be at least 1 SOL."
+    },
+    {
+      "code": 6009,
+      "name": "campaignGoalActualized",
+      "msg": "Campaign goal reached."
+    },
+    {
+      "code": 6010,
+      "name": "invalidWithdrawalAmount",
+      "msg": "Withdrawal amount must be at least 1 SOL."
+    },
+    {
+      "code": 6011,
+      "name": "insufficientFund",
+      "msg": "Insufficient funds in the campaign."
+    },
+    {
+      "code": 6012,
+      "name": "invalidPlatformAddress",
+      "msg": "The provided platform address is invalid."
+    },
+    {
+      "code": 6013,
+      "name": "invalidPlatformFee",
+      "msg": "Invalid platform fee percentage."
     }
   ],
   "types": [
@@ -246,6 +616,34 @@ export type Fundus = {
           {
             "name": "platformAddress",
             "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "transaction",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "cid",
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "u64"
+          },
+          {
+            "name": "credited",
+            "type": "bool"
           }
         ]
       }

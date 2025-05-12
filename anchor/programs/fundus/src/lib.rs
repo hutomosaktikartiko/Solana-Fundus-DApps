@@ -52,4 +52,11 @@ pub mod fundus {
     pub fn withdraw(ctx: Context<WithdrawCtx>, cid: u64, amount: u64) -> Result<()> {
         instructions::withdraw(ctx, cid, amount)
     }
+
+    pub fn update_platform_settings(
+        ctx: Context<UpdatePlatformSettingsCtx>,
+        new_platform_fee: u64,
+    ) -> Result<()> {
+        instructions::update_platform_settings(ctx, new_platform_fee)
+    }
 }

@@ -28,4 +28,6 @@ pub enum ErrorCode {
     InsufficientFund,
     #[msg("The provided platform address is invalid.")]
     InvalidPlatformAddress,
+    #[msg("Invalid platform fee percentage.")]
+    InvalidPlatformFee,
 }
