@@ -113,6 +113,45 @@ export const createCampaign = async (
   return tx;
 };
 
+export const donateToCampaign = async (
+  program: Program<Fundus>,
+  publicKey: PublicKey,
+  pda: string,
+  amount: number
+): Promise<TransactionSignature> => {
+  const campaign = await program.account.campaign.fetch(pda);
+
+  const [transactionPda] = PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("donor"),
+      publicKey.toBuffer(),
+      campaign.cid.toArrayLike(Buffer, "le", 8),
+      campaign.donors.add(new BN(1)).toArrayLike(Buffer, "le", 8),
+    ],
+    program.programId
+  );
+
+  const donation_amount = new BN(amount * 1_000_000_000);
+  const tx = await program.methods
+    .donate(campaign.cid, donation_amount)
+    .accountsPartial({
+      campaign: pda,
+      transaction: transactionPda,
+      donor: publicKey,
+      systemProgram: SystemProgram.programId,
+    })
+    .rpc();
+
+  const connection = new Connection(
+    program.provider.connection.rpcEndpoint,
+    "confirmed"
+  );
+
+  await connection.confirmTransaction(tx, "finalized");
+
+  return tx;
+};
+
 export const fetchActiveCampaigns = async (
   program: Program<Fundus>
 ): Promise<Campaign[]> => {

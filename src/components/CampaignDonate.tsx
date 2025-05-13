@@ -1,25 +1,63 @@
-import React, { FormEvent, useState } from 'react'
-import Link from 'next/link'
-import { FaDollarSign, FaDonate, FaEdit, FaTrashAlt } from 'react-icons/fa'
-import { Campaign } from '@/utils/interfaces'
+import React, { FormEvent, useMemo, useState } from "react";
+import Link from "next/link";
+import { FaDollarSign, FaDonate, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { Campaign } from "@/utils/interfaces";
+import { useWallet } from "@solana/wallet-adapter-react";
+import {
+  donateToCampaign,
+  fetchCampaignDetails,
+  getProvider,
+} from "@/services/blockchain";
+import { toast } from "react-toastify";
 
 const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
   campaign,
   pda,
 }) => {
-  const [amount, setAmount] = useState('')
+  const { publicKey, sendTransaction, signTransaction } = useWallet();
+  const [amount, setAmount] = useState("");
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const program = useMemo(
+    () => getProvider(publicKey, signTransaction, sendTransaction),
+    [publicKey, signTransaction, sendTransaction]
+  );
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
     if (Number(amount) + campaign.amountRaised > campaign.goal) {
-      return alert('Amount exceeds campaign goal')
+      return alert("Amount exceeds campaign goal");
     }
 
-    console.log(`Donated ${amount} SOL to campaign ID: ${campaign.cid}`)
-    alert(`Donation successful! ${amount} SOL contributed.`)
-    setAmount('')
-  }
+    if (!publicKey) return toast.warn("Please connect your wallet first");
+
+    await toast.promise(
+      new Promise<void>(async (resolve, reject) => {
+        try {
+          const tx: any = await donateToCampaign(
+            program!,
+            publicKey!,
+            pda!,
+            Number(amount)
+          );
+
+          setAmount("");
+
+          await fetchCampaignDetails(program!, pda!);
+
+          console.log(tx);
+          resolve(tx);
+        } catch (error) {
+          reject(error);
+        }
+      }),
+      {
+        pending: "Approving transaction...",
+        success: "Transaction successful👌",
+        error: "Encountered an error❌",
+      }
+    );
+  };
 
   return (
     <div>
@@ -43,9 +81,9 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
             ).toFixed(2)} SOL remaining)`}
             value={amount}
             onChange={(e) => {
-              const value = e.target.value
+              const value = e.target.value;
               if (/^\d*\.?\d{0,2}$/.test(value)) {
-                setAmount(value)
+                setAmount(value);
               }
             }}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
@@ -63,8 +101,8 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
               !amount ||
               !campaign.active ||
               campaign.amountRaised >= campaign.goal
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
+                ? "opacity-50 cursor-not-allowed"
+                : ""
             } text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2`}
           >
             <FaDonate />
@@ -72,7 +110,7 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
           </button>
         </form>
 
-        {campaign.creator === '0xCreatorAddress' && (
+        {campaign.creator === "0xCreatorAddress" && (
           <div className="mt-6 flex flex-wrap gap-2 md:flex-nowrap md:gap-0">
             <Link
               href={`/campaign/edit/${pda}`}
@@ -104,7 +142,7 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CampaignDonate
+export default CampaignDonate;
