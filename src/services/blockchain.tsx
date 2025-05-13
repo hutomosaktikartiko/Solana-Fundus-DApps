@@ -121,18 +121,41 @@ export const fetchActiveCampaigns = async (
   return serializeCampaigns(activeCampaigns);
 };
 
+export const fetchCampaignDetails = async (
+  program: Program<Fundus>,
+  pda: string
+): Promise<Campaign> => {
+  const campaign = await program.account.campaign.fetch(pda);
+
+  const seriazed: Campaign = {
+    ...campaign,
+    publicKey: pda,
+    cid: campaign.cid.toNumber(),
+    creator: campaign.creator.toBase58(),
+    goal: campaign.goal.toNumber() / 1e9,
+    amountRaised: campaign.amountRaised.toNumber() / 1e9,
+    timestamp: campaign.timestamp.toNumber() * 1000,
+    donors: campaign.donors.toNumber(),
+    withdrawals: campaign.withdrawals.toNumber(),
+    balance: campaign.balance.toNumber() / 1e9,
+    active: campaign.active,
+  };
+
+  return seriazed;
+};
+
 const serializeCampaigns = (campaigns: any[]): Campaign[] => {
   const modified: Campaign[] = campaigns.map((c: any) => ({
     ...c.account,
     publicKey: c.publicKey.toBase58(),
     cid: c.account.cid.toNumber(),
     creator: c.account.creator.toBase58(),
-    goal: c.account.goal.toNumber(),
-    amountRaised: c.account.amountRaised.toNumber(),
-    timeStamp: c.account.timestamp.toNumber(),
+    goal: c.account.goal.toNumber() / 1e9,
+    amountRaised: c.account.amountRaised.toNumber() / 1e9,
+    timestamp: c.account.timestamp.toNumber() * 1000,
     donors: c.account.donors.toNumber(),
     withdrawals: c.account.withdrawals.toNumber(),
-    balance: c.account.balance.toNumber(),
+    balance: c.account.balance.toNumber() / 1e9,
     active: c.account.active,
   }));
 

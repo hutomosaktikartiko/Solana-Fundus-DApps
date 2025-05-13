@@ -1,31 +1,47 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { useParams } from 'next/navigation'
-import CampaignDetails from '@/components/CampaignDetails'
-import CampaignDonate from '@/components/CampaignDonate'
-import DonationsList from '@/components/DonationsList'
-import WithdrawalList from '@/components/WithdrawalList'
-import Image from 'next/image'
-import WithdrawModal from '@/components/WithdrawModal'
-import DeleteModal from '@/components/DeleteModal'
-import { campaigns, dummyTransactions } from '@/data'
+import React, { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
+import CampaignDetails from "@/components/CampaignDetails";
+import CampaignDonate from "@/components/CampaignDonate";
+import DonationsList from "@/components/DonationsList";
+import WithdrawalList from "@/components/WithdrawalList";
+import Image from "next/image";
+import WithdrawModal from "@/components/WithdrawModal";
+import DeleteModal from "@/components/DeleteModal";
+import { campaigns, dummyTransactions } from "@/data";
+import {
+  fetchCampaignDetails,
+  getProviderReadOnly,
+} from "@/services/blockchain";
+import { Campaign } from "@/utils/interfaces";
 
 export default function CampaignPage() {
-  const { cid } = useParams()
+  const { cid } = useParams();
 
-  // Find the campaign by `cid`
-  const campaign = campaigns.find((c) => c.publicKey === cid)
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const program = useMemo(() => getProviderReadOnly(), []);
+
+  useEffect(() => {
+    if (cid) {
+      const fecthDetails = async () => {
+        const data = await fetchCampaignDetails(program, cid as string);
+        setCampaign(data);
+      };
+
+      fecthDetails();
+    }
+  }, [program, cid]);
 
   // Filter transactions based on the `cid`
   const donations = dummyTransactions.filter(
     (tx) => tx.cid === campaign?.cid && tx.credited
-  )
+  );
   const withdrawals = dummyTransactions.filter(
     (tx) => tx.cid === campaign?.cid && !tx.credited
-  )
+  );
 
-  if (!campaign) return <h4>Campaign not found</h4>
+  if (!campaign) return <h4>Campaign not found</h4>;
 
   return (
     <div className="container mx-auto p-6">
@@ -56,8 +72,8 @@ export default function CampaignPage() {
       </div>
       <DonationsList donations={donations} />
       <WithdrawalList withdrawals={withdrawals} />
-      <WithdrawModal campaign={campaign} pda={cid as string} />
-      <DeleteModal campaign={campaign} pda={cid as string} />
+      {/* <WithdrawModal campaign={campaign} pda={cid as string} />
+      <DeleteModal campaign={campaign} pda={cid as string} /> */}
     </div>
-  )
+  );
 }
