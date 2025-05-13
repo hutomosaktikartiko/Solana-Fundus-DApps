@@ -8,8 +8,8 @@ import {
 import { Fundus } from "../../anchor/target/types/fundus";
 import idl from "../../anchor/target/idl/fundus.json";
 import { Campaign } from "@/utils/interfaces";
-import { publicKey } from "@coral-xyz/anchor/dist/cjs/utils";
-import { timeStamp } from "console";
+import { globalActions } from "@/store/globalSlices";
+import { store } from "@/store";
 
 const getClusterUrl = (cluster: string): string => {
   const clusterUrl: any = {
@@ -23,6 +23,7 @@ const getClusterUrl = (cluster: string): string => {
 };
 
 let tx: any;
+const { setCampaign } = globalActions;
 const CLUSTER: string = process.env.NEXT_PUBLIC_CLUSTER || "localhost";
 const RPC_URL: string = getClusterUrl(CLUSTER);
 
@@ -140,6 +141,8 @@ export const fetchCampaignDetails = async (
     balance: campaign.balance.toNumber() / 1e9,
     active: campaign.active,
   };
+
+  store.dispatch(setCampaign(seriazed));
 
   return seriazed;
 };

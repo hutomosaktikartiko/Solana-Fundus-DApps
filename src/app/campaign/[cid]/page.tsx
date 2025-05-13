@@ -9,24 +9,25 @@ import WithdrawalList from "@/components/WithdrawalList";
 import Image from "next/image";
 import WithdrawModal from "@/components/WithdrawModal";
 import DeleteModal from "@/components/DeleteModal";
-import { campaigns, dummyTransactions } from "@/data";
+import { dummyTransactions } from "@/data";
 import {
   fetchCampaignDetails,
   getProviderReadOnly,
 } from "@/services/blockchain";
-import { Campaign } from "@/utils/interfaces";
+import { RootState } from "@/utils/interfaces";
+import { useSelector } from "react-redux";
 
 export default function CampaignPage() {
   const { cid } = useParams();
 
-  const [campaign, setCampaign] = useState<Campaign | null>(null);
   const program = useMemo(() => getProviderReadOnly(), []);
+
+  const { campaign } = useSelector((states: RootState) => states.globalStates);
 
   useEffect(() => {
     if (cid) {
       const fecthDetails = async () => {
-        const data = await fetchCampaignDetails(program, cid as string);
-        setCampaign(data);
+        await fetchCampaignDetails(program, cid as string);
       };
 
       fecthDetails();
