@@ -19,7 +19,7 @@ export const globalActions = {
   ) => {
     state.withdrawals = action.payload;
   },
-  setState: (state: GlobalState, action: PayloadAction<ProgramState>) => {
+  setStates: (state: GlobalState, action: PayloadAction<ProgramState>) => {
     state.programState = action.payload;
   },
   setDelModal: (state: GlobalState, action: PayloadAction<string>) => {

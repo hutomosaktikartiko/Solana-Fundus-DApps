@@ -1,19 +1,47 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { campaigns as dummyCampaigns, dummyProgramState } from '@/data'
-import CampaignCard from '@/components/CampaignCard'
-import AccountDetails from '@/components/AccountDetails'
+import React, { useEffect, useMemo, useState } from "react";
+import CampaignCard from "@/components/CampaignCard";
+import AccountDetails from "@/components/AccountDetails";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { Campaign, RootState } from "@/utils/interfaces";
+import {
+  fetchProgramState,
+  fetchUserCampaigns,
+  getProviderReadOnly,
+} from "@/services/blockchain";
+import { useSelector } from "react-redux";
 
 export default function Page() {
-  const publicKey = '0x1234567890abcdef' // Static publicKey for the demo
+  const { publicKey } = useWallet();
+  const [loaded, setLoaded] = useState(false);
 
-  // Use dummy data
-  const campaigns = dummyCampaigns
-  const programState = dummyProgramState
+  const { programState } = useSelector(
+    (states: RootState) => states.globalStates
+  );
+
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const program = useMemo(() => getProviderReadOnly(), []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (program && publicKey) {
+        fetchUserCampaigns(program!, publicKey!).then((data) =>
+          setCampaigns(data)
+        );
+      }
+
+      await fetchProgramState(program!);
+      setLoaded(true);
+    };
+
+    fetchData();
+  }, [program, publicKey]);
+
+  if (!loaded) return <h4>Loading...</h4>;
 
   return (
-    <div className="container mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="container mx-auto p-6 grid grzid-cols-1 md:grid-cols-3 gap-6">
       {/* Left side */}
       <div className="md:col-span-2">
         <h1 className="text-3xl font-bold mb-6">My Campaigns</h1>
@@ -44,11 +72,12 @@ export default function Page() {
         )}
       </div>
 
-      {programState && programState.platformAddress === publicKey && (
-        <div className="md:col-span-1">
-          <AccountDetails programState={programState} />
-        </div>
-      )}
+      {programState &&
+        programState.platformAddress === publicKey?.toBase58() && (
+          <div className="md:col-span-1">
+            <AccountDetails programState={programState} />
+          </div>
+        )}
     </div>
-  )
+  );
 }

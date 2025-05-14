@@ -7,7 +7,7 @@ import {
 } from "@solana/web3.js";
 import { Fundus } from "../../anchor/target/types/fundus";
 import idl from "../../anchor/target/idl/fundus.json";
-import { Campaign, Transaction } from "@/utils/interfaces";
+import { Campaign, ProgramState, Transaction } from "@/utils/interfaces";
 import { globalActions } from "@/store/globalSlices";
 import { store } from "@/store";
 
@@ -23,7 +23,7 @@ const getClusterUrl = (cluster: string): string => {
 };
 
 let tx: any;
-const { setCampaign, setDonations, setWithdrawals } = globalActions;
+const { setCampaign, setDonations, setWithdrawals, setStates } = globalActions;
 const CLUSTER: string = process.env.NEXT_PUBLIC_CLUSTER || "localhost";
 const RPC_URL: string = getClusterUrl(CLUSTER);
 
@@ -161,6 +161,18 @@ export const fetchActiveCampaigns = async (
   return serializeCampaigns(activeCampaigns);
 };
 
+export const fetchUserCampaigns = async (
+  program: Program<Fundus>,
+  publicKey: PublicKey
+): Promise<Campaign[]> => {
+  const campaigns = program.account.campaign.all();
+  const userCampaigns = (await campaigns).filter(
+    (c) => c.account.creator.toBase58() === publicKey.toBase58()
+  );
+
+  return serializeCampaigns(userCampaigns);
+};
+
 export const fetchCampaignDetails = async (
   program: Program<Fundus>,
   pda: string
@@ -214,6 +226,29 @@ export const fetchAllWithdrawals = async (
 
   store.dispatch(setWithdrawals(serializeTxs(withdrawals)));
   return serializeTxs(withdrawals);
+};
+
+export const fetchProgramState = async (
+  program: Program<Fundus>
+): Promise<ProgramState> => {
+  const [programStatePda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("program_state")],
+    program.programId
+  );
+
+  const programState = await program.account.programState.fetch(
+    programStatePda
+  );
+
+  const serialized: ProgramState = {
+    ...programState,
+    campaignCount: programState.campaignCount.toNumber(),
+    platformFee: programState.platformFee.toNumber(),
+    platformAddress: programState.platformAddress.toBase58(),
+  };
+
+  store.dispatch(setStates(serialized));
+  return serialized;
 };
 
 const serializeCampaigns = (campaigns: any[]): Campaign[] => {
