@@ -11,6 +11,8 @@ import WithdrawModal from "@/components/WithdrawModal";
 import DeleteModal from "@/components/DeleteModal";
 import { dummyTransactions } from "@/data";
 import {
+  fetchAllDonations,
+  fetchAllWithdrawals,
   fetchCampaignDetails,
   getProviderReadOnly,
 } from "@/services/blockchain";
@@ -22,25 +24,21 @@ export default function CampaignPage() {
 
   const program = useMemo(() => getProviderReadOnly(), []);
 
-  const { campaign } = useSelector((states: RootState) => states.globalStates);
+  const { campaign, donations, withdrawals } = useSelector(
+    (states: RootState) => states.globalStates
+  );
 
   useEffect(() => {
     if (cid) {
       const fecthDetails = async () => {
         await fetchCampaignDetails(program, cid as string);
+        await fetchAllDonations(program, cid as string);
+        await fetchAllWithdrawals(program, cid as string);
       };
 
       fecthDetails();
     }
   }, [program, cid]);
-
-  // Filter transactions based on the `cid`
-  const donations = dummyTransactions.filter(
-    (tx) => tx.cid === campaign?.cid && tx.credited
-  );
-  const withdrawals = dummyTransactions.filter(
-    (tx) => tx.cid === campaign?.cid && !tx.credited
-  );
 
   if (!campaign) return <h4>Campaign not found</h4>;
 

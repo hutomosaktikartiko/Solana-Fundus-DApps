@@ -7,7 +7,7 @@ import {
 } from "@solana/web3.js";
 import { Fundus } from "../../anchor/target/types/fundus";
 import idl from "../../anchor/target/idl/fundus.json";
-import { Campaign } from "@/utils/interfaces";
+import { Campaign, Transaction } from "@/utils/interfaces";
 import { globalActions } from "@/store/globalSlices";
 import { store } from "@/store";
 
@@ -23,7 +23,7 @@ const getClusterUrl = (cluster: string): string => {
 };
 
 let tx: any;
-const { setCampaign } = globalActions;
+const { setCampaign, setDonations, setWithdrawals } = globalActions;
 const CLUSTER: string = process.env.NEXT_PUBLIC_CLUSTER || "localhost";
 const RPC_URL: string = getClusterUrl(CLUSTER);
 
@@ -186,6 +186,36 @@ export const fetchCampaignDetails = async (
   return seriazed;
 };
 
+export const fetchAllDonations = async (
+  program: Program<Fundus>,
+  pda: string
+): Promise<Transaction[]> => {
+  const campaign = await program.account.campaign.fetch(pda);
+  const transactions = await program.account.transaction.all();
+
+  const donations = transactions.filter(
+    (tx) => tx.account.cid.eq(campaign.cid) && tx.account.credited
+  );
+
+  store.dispatch(setDonations(serializeTxs(donations)));
+  return serializeTxs(donations);
+};
+
+export const fetchAllWithdrawals = async (
+  program: Program<Fundus>,
+  pda: string
+): Promise<Transaction[]> => {
+  const campaign = await program.account.campaign.fetch(pda);
+  const transactions = await program.account.transaction.all();
+
+  const withdrawals = transactions.filter(
+    (tx) => tx.account.cid.eq(campaign.cid) && !tx.account.credited
+  );
+
+  store.dispatch(setWithdrawals(serializeTxs(withdrawals)));
+  return serializeTxs(withdrawals);
+};
+
 const serializeCampaigns = (campaigns: any[]): Campaign[] => {
   const modified: Campaign[] = campaigns.map((c: any) => ({
     ...c.account,
@@ -202,4 +232,15 @@ const serializeCampaigns = (campaigns: any[]): Campaign[] => {
   }));
 
   return modified;
+};
+
+const serializeTxs = (transactions: any[]): Transaction[] => {
+  return transactions.map((c: any) => ({
+    ...c.account,
+    publicKey: c.publicKey.toBase58(),
+    owner: c.account.owner.toBase58(),
+    cid: c.account.cid.toNumber(),
+    amount: c.account.amount.toNumber() / 1e9,
+    timestamp: c.account.timestamp.toNumber() * 1000,
+  }));
 };

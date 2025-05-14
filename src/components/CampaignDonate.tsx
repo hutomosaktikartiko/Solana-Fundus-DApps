@@ -5,6 +5,7 @@ import { Campaign } from "@/utils/interfaces";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   donateToCampaign,
+  fetchAllDonations,
   fetchCampaignDetails,
   getProvider,
 } from "@/services/blockchain";
@@ -44,6 +45,7 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
           setAmount("");
 
           await fetchCampaignDetails(program!, pda!);
+          await fetchAllDonations(program!, pda!);
 
           console.log(tx);
           resolve(tx);
