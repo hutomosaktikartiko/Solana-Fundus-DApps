@@ -10,17 +10,7 @@ import idl from "../../anchor/target/idl/fundus.json";
 import { Campaign, ProgramState, Transaction } from "@/utils/interfaces";
 import { globalActions } from "@/store/globalSlices";
 import { store } from "@/store";
-
-const getClusterUrl = (cluster: string): string => {
-  const clusterUrl: any = {
-    "mainnet-beta": "https://api.mainnet-beta.solana.com",
-    testnet: "https://api.testnet.solana.com",
-    devnet: "https://api.devnet.solana.com",
-    localhost: "http://localhost:8899",
-  };
-
-  return clusterUrl[cluster];
-};
+import { getClusterUrl } from "@/utils/helper";
 
 let tx: any;
 const { setCampaign, setDonations, setWithdrawals, setStates } = globalActions;

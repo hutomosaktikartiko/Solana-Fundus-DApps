@@ -1,13 +1,14 @@
-import { truncateAddress } from '@/utils/helper'
-import { Transaction } from '@/utils/interfaces'
-import Link from 'next/link'
-import React from 'react'
-import { FaMoneyBillWave } from 'react-icons/fa'
+import { getCluster, truncateAddress } from "@/utils/helper";
+import { Transaction } from "@/utils/interfaces";
+import Link from "next/link";
+import React from "react";
+import { FaMoneyBillWave } from "react-icons/fa";
 
 const WithdrawalList: React.FC<{ withdrawals: Transaction[] }> = ({
   withdrawals,
 }) => {
-  const CLUSTER_NAME = process.env.CLUSTER_NAME || 'custom'
+  const CLUSTER: string = process.env.NEXT_PUBLIC_CLUSTER || "localhost";
+  const CLUSTER_NAME: string = getCluster(CLUSTER);
 
   return (
     <div className="mt-8">
@@ -30,7 +31,7 @@ const WithdrawalList: React.FC<{ withdrawals: Transaction[] }> = ({
                   >
                     {truncateAddress(withdrawal.owner)}
                   </Link>
-                </strong>{' '}
+                </strong>{" "}
                 <small className="text-red-500">
                   {withdrawal.amount.toLocaleString()} SOL
                 </small>
@@ -45,7 +46,7 @@ const WithdrawalList: React.FC<{ withdrawals: Transaction[] }> = ({
         <p className="text-gray-600">No withdrawals yet.</p>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default WithdrawalList
+export default WithdrawalList;
