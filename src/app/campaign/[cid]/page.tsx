@@ -71,8 +71,8 @@ export default function CampaignPage() {
       </div>
       <DonationsList donations={donations} />
       <WithdrawalList withdrawals={withdrawals} />
-      {/* <WithdrawModal campaign={campaign} pda={cid as string} />
-      <DeleteModal campaign={campaign} pda={cid as string} /> */}
+      <WithdrawModal campaign={campaign} pda={cid as string} />
+      {/* <DeleteModal campaign={campaign} pda={cid as string} /> */}
     </div>
   );
 }

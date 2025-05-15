@@ -10,6 +10,8 @@ import {
   getProvider,
 } from "@/services/blockchain";
 import { toast } from "react-toastify";
+import { globalActions } from "@/store/globalSlices";
+import { useDispatch } from "react-redux";
 
 const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
   campaign,
@@ -17,6 +19,8 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
 }) => {
   const { publicKey, sendTransaction, signTransaction } = useWallet();
   const [amount, setAmount] = useState("");
+  const { setWithdrawModal } = globalActions;
+  const dispatch = useDispatch();
 
   const program = useMemo(
     () => getProvider(publicKey, signTransaction, sendTransaction),
@@ -112,7 +116,7 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
           </button>
         </form>
 
-        {campaign.creator === "0xCreatorAddress" && (
+        {publicKey && campaign.creator === publicKey.toBase58() && (
           <div className="mt-6 flex flex-wrap gap-2 md:flex-nowrap md:gap-0">
             <Link
               href={`/campaign/edit/${pda}`}
@@ -136,6 +140,7 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
               className="bg-transparent hover:bg-green-600 text-green-600 hover:text-white
               font-semibold py-2 px-4 flex-1 md:rounded-r-lg flex items-center justify-center
               border border-green-600 hover:border-transparent"
+              onClick={() => dispatch(setWithdrawModal("scale-100"))}
             >
               <FaDollarSign />
               Payout

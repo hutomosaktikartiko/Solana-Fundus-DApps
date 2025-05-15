@@ -5,6 +5,6 @@ export const globalStates: GlobalState = {
   donations: [],
   withdrawals: [],
   programState: null,
-  delModal: "",
-  withdrawModal: "",
+  delModal: "scale-0",
+  withdrawModal: "scale-0",
 };

@@ -152,6 +152,56 @@ export const donateToCampaign = async (
   return tx;
 };
 
+export const withdrawFromCampaign = async (
+  program: Program<Fundus>,
+  publicKey: PublicKey,
+  pda: string,
+  amount: number
+): Promise<TransactionSignature> => {
+  const campaign = await program.account.campaign.fetch(pda);
+
+  const [programStatePda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("program_state")],
+    program.programId
+  );
+
+  const [transactionPda] = PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("withdraw"),
+      publicKey.toBuffer(),
+      campaign.cid.toArrayLike(Buffer, "le", 8),
+      campaign.withdrawals.add(new BN(1)).toArrayLike(Buffer, "le", 8),
+    ],
+    program.programId
+  );
+
+  const programState = await program.account.programState.fetch(
+    programStatePda
+  );
+
+  const withdraw_amount = new BN(amount * 1_000_000_000);
+  const tx = await program.methods
+    .withdraw(campaign.cid, withdraw_amount)
+    .accountsPartial({
+      programState: programStatePda,
+      campaign: pda,
+      transaction: transactionPda,
+      creator: publicKey,
+      platformAddress: programState.platformAddress,
+      systemProgram: SystemProgram.programId,
+    })
+    .rpc();
+
+  const connection = new Connection(
+    program.provider.connection.rpcEndpoint,
+    "confirmed"
+  );
+
+  await connection.confirmTransaction(tx, "finalized");
+
+  return tx;
+};
+
 export const fetchActiveCampaigns = async (
   program: Program<Fundus>
 ): Promise<Campaign[]> => {
