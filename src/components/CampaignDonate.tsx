@@ -19,7 +19,7 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
 }) => {
   const { publicKey, sendTransaction, signTransaction } = useWallet();
   const [amount, setAmount] = useState("");
-  const { setWithdrawModal } = globalActions;
+  const { setWithdrawModal, setDelModal } = globalActions;
   const dispatch = useDispatch();
 
   const program = useMemo(
@@ -127,14 +127,17 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
               <FaEdit />
               Edit
             </Link>
-            <button
-              type="button"
-              className="bg-green-600 hover:bg-green-700 text-white
+            {campaign.active && (
+              <button
+                type="button"
+                className="bg-green-600 hover:bg-green-700 text-white
               font-semibold py-2 px-4 flex-1 flex items-center justify-center"
-            >
-              <FaTrashAlt />
-              Delete
-            </button>
+                onClick={() => dispatch(setDelModal("scale-100"))}
+              >
+                <FaTrashAlt />
+                Delete
+              </button>
+            )}
 
             <button
               className="bg-transparent hover:bg-green-600 text-green-600 hover:text-white

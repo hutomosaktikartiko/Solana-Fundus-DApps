@@ -134,6 +134,32 @@ export const updateCampaign = async (
   return tx;
 };
 
+export const deleteCampaign = async (
+  program: Program<Fundus>,
+  publicKey: PublicKey,
+  pda: string
+): Promise<TransactionSignature> => {
+  const campaign = await program.account.campaign.fetch(pda);
+
+  const tx = await program.methods
+    .deleteCampaign(campaign.cid)
+    .accountsPartial({
+      campaign: pda,
+      creator: publicKey,
+      systemProgram: SystemProgram.programId,
+    })
+    .rpc();
+
+  const connection = new Connection(
+    program.provider.connection.rpcEndpoint,
+    "confirmed"
+  );
+
+  await connection.confirmTransaction(tx, "finalized");
+
+  return tx;
+};
+
 export const donateToCampaign = async (
   program: Program<Fundus>,
   publicKey: PublicKey,
