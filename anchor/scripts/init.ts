@@ -2,6 +2,12 @@ import * as anchor from "@coral-xyz/anchor";
 import { Fundus } from "../target/types/fundus";
 import idl from "../target/idl/fundus.json";
 import fs from "fs";
+import dotenv from "dotenv";
+import bs58 from "bs58";
+
+// Load environment variables
+dotenv.config();
+
 const { SystemProgram, PublicKey } = anchor.web3;
 
 const main = async (cluster: string) => {
@@ -19,12 +25,14 @@ const main = async (cluster: string) => {
     "confirmed"
   );
 
-  // Load the wallet from the deployer's keypair file
-  const keypairPath = `${process.env.HOME}/.config/solana/id.json`;
-  const keypairData = JSON.parse(fs.readFileSync(keypairPath, "utf-8"));
-  const wallet = anchor.web3.Keypair.fromSecretKey(
-    Uint8Array.from(keypairData)
-  );
+  // Loan keypair data from PRIVATE_KEY in file .env
+  const privateKey = process.env.PRIVATE_KEY;
+  if (!privateKey) {
+    throw new Error("PRIVATE_KEY not found in .env file");
+  }
+
+  const decodedKey = bs58.decode(privateKey);
+  const wallet = anchor.web3.Keypair.fromSecretKey(decodedKey);
 
   // Create a provider
   const provider = new anchor.AnchorProvider(
