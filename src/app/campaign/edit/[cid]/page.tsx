@@ -1,32 +1,92 @@
-'use client'
+"use client";
 
-import { useParams } from 'next/navigation'
-import { useState } from 'react'
-import { campaigns } from '@/data'
-import Link from 'next/link'
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { RootState } from "@/utils/interfaces";
+import { useSelector } from "react-redux";
+import {
+  fetchCampaignDetails,
+  getProvider,
+  getProviderReadOnly,
+  updateCampaign,
+} from "@/services/blockchain";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { toast } from "react-toastify";
 
 export default function Page() {
-  const { cid } = useParams()
+  const { cid } = useParams();
+  const programReadOnly = useMemo(() => getProviderReadOnly(), []);
 
-  // Static data: Find the campaign using `cid`
-  const campaign = campaigns.find((c) => c.publicKey === (cid as string))
+  const { campaign } = useSelector((states: RootState) => states.globalStates);
+  const { publicKey, sendTransaction, signTransaction } = useWallet();
+
+  const program = useMemo(
+    () => getProvider(publicKey, signTransaction, sendTransaction),
+    [publicKey, signTransaction, sendTransaction]
+  );
 
   // Local form state
   const [form, setForm] = useState({
-    title: campaign?.title || '',
-    description: campaign?.description || '',
-    image_url: campaign?.imageUrl || '',
-    goal: campaign?.goal || '',
-  })
+    title: campaign?.title || "",
+    description: campaign?.description || "",
+    image_url: campaign?.imageUrl || "",
+    goal: campaign?.goal || "",
+  });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    console.log('Form Submitted:', form)
-    alert('Campaign updated successfully!')
-  }
+  useEffect(() => {
+    if (cid) {
+      const fecthDetails = async () => {
+        const campaignData = await fetchCampaignDetails(
+          programReadOnly,
+          cid as string
+        );
+        form.title = campaignData.title;
+        form.description = campaignData.description;
+        form.image_url = campaignData.imageUrl;
+        form.goal = campaignData.goal;
+      };
+
+      fecthDetails();
+    }
+  }, [programReadOnly, cid]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!publicKey) {
+      return toast.warn("Please connect your wallet first");
+    }
+
+    await toast.promise(
+      new Promise<void>(async (resolve, reject) => {
+        try {
+          const { title, description, image_url, goal } = form;
+          const tx: any = await updateCampaign(
+            program!,
+            publicKey!,
+            cid as string,
+            title,
+            description,
+            image_url,
+            Number(goal)
+          );
+
+          console.log(tx);
+          resolve(tx);
+        } catch (error) {
+          reject(error);
+        }
+      }),
+      {
+        pending: "Approve transaction...",
+        success: "Transaction successful👌",
+        error: "Encountered an error❌",
+      }
+    );
+  };
 
   // Fallback if campaign not found
-  if (!campaign) return <h4>Campaign not found</h4>
+  if (!campaign) return <h4>Campaign not found</h4>;
 
   return (
     <div className="container mx-auto p-6">
@@ -55,9 +115,9 @@ export default function Page() {
           placeholder="How many SOLs for your dream?"
           value={form.goal}
           onChange={(e) => {
-            const value = e.target.value
+            const value = e.target.value;
             if (/^\d*\.?\d{0,2}$/.test(value)) {
-              setForm({ ...form, goal: value })
+              setForm({ ...form, goal: value });
             }
           }}
           className="w-full p-2 border rounded text-black"
@@ -89,5 +149,5 @@ export default function Page() {
         </div>
       </form>
     </div>
-  )
+  );
 }

@@ -103,6 +103,37 @@ export const createCampaign = async (
   return tx;
 };
 
+export const updateCampaign = async (
+  program: Program<Fundus>,
+  publicKey: PublicKey,
+  pda: string,
+  title: string,
+  description: string,
+  image_url: string,
+  goal: number
+): Promise<TransactionSignature> => {
+  const campaign = await program.account.campaign.fetch(pda);
+
+  const goalBN = new BN(goal * 1_000_000_000);
+  const tx = await program.methods
+    .updateCampaign(campaign.cid, title, description, image_url, goalBN)
+    .accountsPartial({
+      campaign: pda,
+      creator: publicKey,
+      systemProgram: SystemProgram.programId,
+    })
+    .rpc();
+
+  const connection = new Connection(
+    program.provider.connection.rpcEndpoint,
+    "confirmed"
+  );
+
+  await connection.confirmTransaction(tx, "finalized");
+
+  return tx;
+};
+
 export const donateToCampaign = async (
   program: Program<Fundus>,
   publicKey: PublicKey,
