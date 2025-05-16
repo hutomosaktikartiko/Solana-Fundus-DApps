@@ -160,6 +160,34 @@ export const deleteCampaign = async (
   return tx;
 };
 
+export const updatePlatform = async (
+  program: Program<Fundus>,
+  publicKey: PublicKey,
+  percent: number
+): Promise<TransactionSignature> => {
+  const [programStatePda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("program_state")],
+    program.programId
+  );
+
+  const tx = await program.methods
+    .updatePlatformSettings(new BN(percent))
+    .accountsPartial({
+      updater: publicKey,
+      programState: programStatePda,
+    })
+    .rpc();
+
+  const connection = new Connection(
+    program.provider.connection.rpcEndpoint,
+    "confirmed"
+  );
+
+  await connection.confirmTransaction(tx, "finalized");
+
+  return tx;
+};
+
 export const donateToCampaign = async (
   program: Program<Fundus>,
   publicKey: PublicKey,

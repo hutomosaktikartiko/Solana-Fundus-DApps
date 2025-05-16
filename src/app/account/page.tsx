@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import CampaignCard from "@/components/CampaignCard";
-import AccountDetails from "@/components/AccountDetails";
+import PlatformSettings from "@/components/PlatformSettings";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Campaign, RootState } from "@/utils/interfaces";
 import {
@@ -75,7 +75,7 @@ export default function Page() {
       {programState &&
         programState.platformAddress === publicKey?.toBase58() && (
           <div className="md:col-span-1">
-            <AccountDetails programState={programState} />
+            <PlatformSettings programState={programState} />
           </div>
         )}
     </div>
