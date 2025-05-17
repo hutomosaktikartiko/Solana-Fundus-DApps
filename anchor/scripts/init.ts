@@ -1,27 +1,20 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Fundus } from "../target/types/fundus";
 import idl from "../target/idl/fundus.json";
-import fs from "fs";
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
+import path from "path";
 import bs58 from "bs58";
+import { getClusterUrl } from "@/utils/helper";
 
-// Load environment variables
-dotenv.config();
+// Load .env from parent directory
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const { SystemProgram, PublicKey } = anchor.web3;
 
 const main = async (cluster: string) => {
-  // Define the cluster URL
-  const clusterUrl: any = {
-    "mainnet-beta": "https://api.mainnet-beta.solana.com",
-    testnet: "https://api.testnet.solana.com",
-    devnet: "https://api.devnet.solana.com",
-    localhost: "http://localhost:8899",
-  };
-
   // Create a connection to the cluster
   const connection = new anchor.web3.Connection(
-    clusterUrl[cluster],
+    getClusterUrl(cluster),
     "confirmed"
   );
 
@@ -70,6 +63,6 @@ const main = async (cluster: string) => {
   }
 };
 
-// Default to devnet if NEXT_PUBLIC_CLUSTER is not set
+// Default to localhost if NEXT_PUBLIC_CLUSTER is not set
 const cluster: string = process.env.NEXT_PUBLIC_CLUSTER || "localhost";
 main(cluster).catch((error) => console.error(error));
