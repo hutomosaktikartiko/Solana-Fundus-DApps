@@ -1,94 +1,186 @@
-# fundus
+# Fundus - Solana Web3 Application
 
-## Getting Started
+A Next.js-based web application for interacting with Solana blockchain, built with Anchor framework.
 
-### Prerequisites
+## Documentation
 
-- Node v18.18.0 or higher
+- [Smart Contracts Documentation](./SMART_CONTRACTS.md) - Detailed documentation of the Solana program instructions, state accounts, and security considerations
 
-- Rust v1.77.2 or higher
-- Anchor CLI 0.30.1 or higher
-- Solana CLI 1.18.17 or higher
+## Requirements
 
-### Installation
+- Node.js (v16 or higher)
+- Rust and Cargo
+- Solana CLI tools
+- Anchor Framework
+- Yarn (for Next.js) and pnpm (for Anchor)
 
-#### Clone the repo
+## Environment Setup
 
-```shell
-git clone <repo-url>
-cd <repo-name>
+1. Copy `.env_example` to `.env`:
+
+```bash
+cp .env_example .env
 ```
 
-#### Install Dependencies
+2. Configure the following environment variables in `.env`:
 
-```shell
+- `NEXT_PUBLIC_CLUSTER`: The Solana cluster to connect to (e.g., "mainnet-beta", "testnet", "devnet", "localhost")
+- `PRIVATE_KEY`: Your wallet's private key (keep this secure and never commit to version control)
+  - This wallet is used for initializing contracts and performing administrative operations
+  - Make sure this wallet has enough SOL for deployment and transaction fees
+- `ADDRESS`: Your wallet's public address
+  - This should match the public key derived from your private key
+  - Used for contract initialization and verification
+
+## Building and Running
+
+### 1. Install Dependencies
+
+For Anchor program:
+
+```bash
 pnpm install
 ```
 
-#### Start the web app
+For Next.js application:
 
-```
-pnpm dev
-```
-
-## Apps
-
-### anchor
-
-This is a Solana program written in Rust using the Anchor framework.
-
-#### Commands
-
-You can use any normal anchor commands. Either move to the `anchor` directory and run the `anchor` command or prefix the command with `pnpm`, eg: `pnpm anchor`.
-
-#### Sync the program id:
-
-Running this command will create a new keypair in the `anchor/target/deploy` directory and save the address to the Anchor config file and update the `declare_id!` macro in the `./src/lib.rs` file of the program.
-
-You will manually need to update the constant in `anchor/lib/basic-exports.ts` to match the new program id.
-
-```shell
-pnpm anchor keys sync
+```bash
+yarn install
 ```
 
-#### Build the program:
+### 2. Build Anchor Program
 
-```shell
+First, navigate to the anchor directory:
+
+```bash
+cd anchor
+```
+
+Then build the program:
+
+```bash
 pnpm anchor-build
 ```
 
-#### Start the test validator with the program deployed:
+Note: All anchor-related commands must be run from within the `anchor` directory. You can either:
 
-```shell
-pnpm anchor-localnet
+- Change directory to `anchor` first, or
+- Use the provided npm scripts that handle the directory change automatically
+
+### 3. Initialize Program (Required)
+
+The initialization script must be run to set up the contract state. This is a required step before using the application:
+
+```bash
+pnpm esrun src/scripts/init.ts
 ```
 
-#### Run the tests
+This script will:
 
-```shell
-pnpm anchor-test
+- Initialize the contract with necessary parameters
+- Set up required accounts
+- Configure initial state
+
+### 4. Development
+
+For Next.js application:
+
+```bash
+yarn dev
 ```
 
-#### Deploy to Devnet
+### 5. Production Build
 
-```shell
-pnpm anchor deploy --provider.cluster devnet
+```bash
+yarn build
+yarn start
 ```
 
-### web
+## Cluster Options
 
-This is a React app that uses the Anchor generated client to interact with the Solana program.
+### Local Development
 
-#### Commands
+If using localhost cluster:
 
-Start the web app
+1. Start a local Solana validator:
 
-```shell
-pnpm dev
+```bash
+solana-test-validator --reset
 ```
 
-Build the web app
+### Available Clusters
 
-```shell
-pnpm build
+- `mainnet-beta`: Production Solana network
+- `testnet`: Solana test network
+- `devnet`: Solana development network
+- `localhost`: Local development network
+
+## Project Structure
+
+- `/anchor`: Solana program code
+  - Contains all Solana program-related files
+  - Must be in this directory to run anchor commands
+  - Includes program logic, tests, and deployment configurations
+- `/src`: Next.js application code
+  - `/components`: React components
+  - `/hooks`: Custom React hooks
+  - `/scripts`: Utility scripts
+  - `/store`: State management
+  - `/utils`: Helper functions
+- `/public`: Static assets
+- `/test-ledger`: Test configuration and data
+
+## Testing
+
+Run Anchor tests (from the anchor directory):
+
+```bash
+cd anchor
+pnpm anchor test --skip-local-validator --skip-deploy
 ```
+
+Note: The `--skip-local-validator` flag is used when you're running your own validator, and `--skip-deploy` is used when you want to skip the deployment step.
+
+## Technologies Used
+
+- Next.js 14
+- Solana Web3.js
+- Anchor Framework
+- TailwindCSS
+- DaisyUI
+- React Query
+- Redux Toolkit
+- TypeScript
+
+## License
+
+This project is licensed under the terms of the license included in the repository.
+
+## Deployment
+
+### Vercel Deployment
+
+1. Push your code to a Git repository (GitHub, GitLab, or Bitbucket)
+
+2. Import your project in Vercel:
+
+   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
+   - Click "New Project"
+   - Import your repository
+   - Select the repository
+
+3. Configure Environment Variables:
+
+   - In your project settings on Vercel, go to "Environment Variables"
+   - Add the following environment variable:
+     ```
+     NEXT_PUBLIC_CLUSTER=mainnet-beta  # or your preferred cluster (testnet, devnet)
+     ```
+   - Note: Only `NEXT_PUBLIC_CLUSTER` is needed for Vercel deployment as it's the only public environment variable
+   - Other environment variables (`PRIVATE_KEY` and `ADDRESS`) are only needed for local development and contract initialization
+
+4. Deploy:
+   - Click "Deploy"
+   - Vercel will automatically build and deploy your application
+
+Note: Make sure your Solana program is already deployed to the same cluster you specify in `NEXT_PUBLIC_CLUSTER`.
