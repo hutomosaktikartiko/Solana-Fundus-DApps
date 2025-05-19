@@ -236,7 +236,7 @@ Run tests using:
 
 ```bash
 cd anchor
-pnpm anchor test --skip-local-validator --skip-deploy
+anchor test --skip-local-validator --skip-deploy
 ```
 
 ## Deployment
@@ -246,5 +246,12 @@ The program can be deployed to:
 - Local network (for development)
 - Devnet (for testing)
 - Mainnet (for production)
+
+To deploy the program:
+
+```bash
+cd anchor
+anchor deploy
+```
 
 Ensure proper program ID configuration before deployment.

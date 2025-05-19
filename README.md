@@ -59,7 +59,7 @@ cd anchor
 Then build the program:
 
 ```bash
-pnpm anchor-build
+anchor build
 ```
 
 Note: All anchor-related commands must be run from within the `anchor` directory. You can either:
@@ -67,12 +67,20 @@ Note: All anchor-related commands must be run from within the `anchor` directory
 - Change directory to `anchor` first, or
 - Use the provided npm scripts that handle the directory change automatically
 
-### 3. Initialize Program (Required)
+### 3. Deploy Program
+
+To deploy the program to your chosen cluster:
+
+```bash
+anchor deploy
+```
+
+### 4. Initialize Program (Required)
 
 The initialization script must be run to set up the contract state. This is a required step before using the application:
 
 ```bash
-pnpm esrun src/scripts/init.ts
+npx esrun src/scripts/init.ts
 ```
 
 This script will:
@@ -81,7 +89,7 @@ This script will:
 - Set up required accounts
 - Configure initial state
 
-### 4. Development
+### 5. Development
 
 For Next.js application:
 
@@ -89,7 +97,7 @@ For Next.js application:
 yarn dev
 ```
 
-### 5. Production Build
+### 6. Production Build
 
 ```bash
 yarn build
@@ -136,7 +144,7 @@ Run Anchor tests (from the anchor directory):
 
 ```bash
 cd anchor
-pnpm anchor test --skip-local-validator --skip-deploy
+anchor test --skip-local-validator --skip-deploy
 ```
 
 Note: The `--skip-local-validator` flag is used when you're running your own validator, and `--skip-deploy` is used when you want to skip the deployment step.
